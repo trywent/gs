@@ -1,0 +1,178 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.bt.PhoneFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="1125dp"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="8dp">
+
+        <ListView
+            android:id="@+id/contact"
+            android:layout_width="311dp"
+            android:layout_height="538dp" />
+
+
+        <RelativeLayout
+            android:layout_width="393dp"
+            android:layout_height="517dp">
+
+            <Button
+                android:id="@+id/call"
+                android:layout_width="100dp"
+                android:layout_height="40dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignTop="@+id/hangup"
+                android:layout_marginStart="33dp"
+                android:text="call" />
+
+            <Button
+                android:id="@+id/hangup"
+                android:layout_width="100dp"
+                android:layout_height="40dp"
+                android:layout_alignStart="@+id/num2"
+                android:layout_alignTop="@+id/audio"
+                android:text="hang up" />
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="287dp"
+                android:layout_height="40dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginEnd="106dp"
+                android:layout_marginRight="106dp"
+                android:layout_marginTop="28dp" />
+
+            <Button
+                android:id="@+id/audio"
+                android:layout_width="100dp"
+                android:layout_height="40dp"
+                android:layout_alignEnd="@+id/delete"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="64dp"
+                android:text="audio" />
+
+            <Button
+                android:id="@+id/delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="-106dp"
+                android:layout_marginTop="22dp"
+                android:layout_toEndOf="@+id/textView3"
+                android:text="DEL" />
+
+            <Button
+                android:id="@+id/num1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/num4"
+                android:layout_alignEnd="@+id/call"
+                android:layout_marginBottom="-220dp"
+                android:text="1" />
+
+            <Button
+                android:id="@+id/num2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/num1"
+                android:layout_centerHorizontal="true"
+                android:text="2" />
+
+            <Button
+                android:id="@+id/num3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/num1"
+                android:layout_toEndOf="@+id/hangup"
+                android:text="3" />
+
+            <Button
+                android:id="@+id/num4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignEnd="@+id/call"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="220dp"
+                android:text="4" />
+
+            <Button
+                android:id="@+id/num5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/num4"
+                android:layout_centerHorizontal="true"
+                android:text="5" />
+
+            <Button
+                android:id="@+id/num6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/num4"
+                android:layout_toEndOf="@+id/hangup"
+                android:text="6" />
+
+            <Button
+                android:id="@+id/num7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignEnd="@+id/call"
+                android:layout_below="@+id/num4"
+                android:text="7" />
+
+            <Button
+                android:id="@+id/num8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/num7"
+                android:layout_centerHorizontal="true"
+                android:text="8" />
+
+            <Button
+                android:id="@+id/num9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignStart="@+id/num12"
+                android:layout_below="@+id/num4"
+                android:text="9" />
+
+            <Button
+                android:id="@+id/num10"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignEnd="@+id/call"
+                android:layout_below="@+id/num7"
+                android:text="*" />
+
+            <Button
+                android:id="@+id/num11"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/num10"
+                android:layout_centerHorizontal="true"
+                android:text="0" />
+
+            <Button
+                android:id="@+id/num12"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/num7"
+                android:layout_toEndOf="@+id/hangup"
+                android:text="#" />
+
+        </RelativeLayout>
+
+        <ListView
+            android:id="@+id/recent"
+            android:layout_width="311dp"
+            android:layout_height="538dp" />
+    </LinearLayout>
+</FrameLayout>

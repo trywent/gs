@@ -1,0 +1,80 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.bt.DeviceFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="8dp">
+
+        <ListView
+            android:id="@+id/listview1"
+            android:layout_width="406dp"
+            android:layout_height="match_parent" />
+
+        <RelativeLayout
+            android:layout_width="443dp"
+            android:layout_height="match_parent">
+
+            <Button
+                android:id="@+id/scan"
+                android:layout_width="120dp"
+                android:layout_height="50dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginEnd="20dp"
+                android:layout_marginTop="142dp"
+                android:text="Scan" />
+
+            <Button
+                android:id="@+id/conn"
+                android:layout_width="120dp"
+                android:layout_height="50dp"
+                android:layout_alignStart="@+id/scan"
+                android:layout_centerVertical="true"
+                android:text="connect" />
+
+            <Button
+                android:id="@+id/disconn"
+                android:layout_width="120dp"
+                android:layout_height="50dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignStart="@+id/scan"
+                android:layout_marginBottom="148dp"
+                android:text="Disconn" />
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="286dp"
+                android:layout_height="239dp"
+                android:layout_above="@+id/unpair"
+                android:layout_alignParentStart="true"
+                android:text="current bounded device" />
+
+            <Switch
+                android:id="@+id/switch1"
+                android:layout_width="329dp"
+                android:layout_height="80dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="19dp"
+                android:text="bluetooth on/off"
+                android:textOff="bluetooth off"
+                android:textOn="bluetooth on" />
+
+            <Button
+                android:id="@+id/unpair"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignStart="@+id/scan"
+                android:layout_marginBottom="68dp"
+                android:text="unpair" />
+        </RelativeLayout>
+
+    </LinearLayout>
+</FrameLayout>

@@ -1,0 +1,90 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.bt.MusicFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:weightSum="1">
+
+        <RelativeLayout
+            android:layout_width="561dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.02">
+
+            <Button
+                android:id="@+id/pre"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginBottom="48dp"
+                android:text="prev" />
+
+            <Button
+                android:id="@+id/play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/pre"
+                android:layout_marginLeft="61dp"
+                android:layout_marginStart="61dp"
+                android:layout_toEndOf="@+id/pre"
+                android:layout_toRightOf="@+id/pre"
+                android:text="play" />
+
+            <Button
+                android:id="@+id/next"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/play"
+                android:layout_marginLeft="54dp"
+                android:layout_marginStart="54dp"
+                android:layout_toEndOf="@+id/play"
+                android:layout_toRightOf="@+id/play"
+                android:text="next" />
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="306dp"
+                android:layout_above="@+id/pre"
+                android:layout_alignEnd="@+id/next"
+                android:layout_alignLeft="@+id/pre"
+                android:layout_alignParentTop="true"
+                android:layout_alignRight="@+id/next"
+                android:layout_alignStart="@+id/pre"
+                android:layout_marginEnd="-171dp"
+                android:layout_marginRight="-171dp"
+                android:layout_marginTop="125dp" />
+
+            <TextView
+                android:id="@+id/info"
+                android:layout_width="match_parent"
+                android:layout_height="124dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:text="TextView" />
+
+            <Button
+                android:id="@+id/button2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignTop="@+id/pre"
+                android:layout_marginEnd="32dp"
+                android:text="Button" />
+
+        </RelativeLayout>
+
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.02" />
+
+    </LinearLayout>
+
+</FrameLayout>

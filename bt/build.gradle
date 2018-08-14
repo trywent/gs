@@ -1,0 +1,64 @@
+apply plugin: 'com.android.application'
+
+android {
+    signingConfigs {
+        config {
+            storeFile file('/home/bsp/workspace/security/platform.pk8')
+        }
+    }
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "com.example.bt"
+        minSdkVersion 26
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        vectorDrawables.useSupportLibrary = true
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compileOnly files('libs/framework.jar')
+    compileOnly fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:appcompat-v7:28.0.0-alpha3'
+    implementation 'com.android.support:design:28.0.0-alpha3'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
+    implementation 'com.android.support:support-vector-drawable:28.0.0-alpha3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}
+
+task pushDownJdkDependency {
+    def imlFile = file("app.iml")
+    println 'Change app.iml order'
+    try {
+        def parsedXml = (new XmlParser()).parse(imlFile)
+        def jdkNode = parsedXml.component[1].orderEntry.find { it.'@type' == 'jdk' }
+        parsedXml.component[1].remove(jdkNode)
+        new Node(parsedXml.component[1], 'orderEntry', ['type': 'jdk', 'jdkName': "Android API 23 Platform", 'jdkType': 'Android SDK'])
+        def writer = new StringWriter()
+        new XmlNodePrinter(new PrintWriter(writer)).print(parsedXml)
+        imlFile.text = writer.toString()
+    } catch (FileNotFoundException e) {
+        // nop, iml not found
+    }
+}
+
+
+gradle.projectsEvaluated {
+    preBuild.dependsOn(pushDownJdkDependency)
+    tasks.withType(JavaCompile) {
+        options.compilerArgs.add('-Xbootclasspath/p:bt/libs/framework.jar')
+    }
+}
