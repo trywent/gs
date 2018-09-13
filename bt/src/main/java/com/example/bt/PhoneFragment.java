@@ -1,6 +1,7 @@
 package com.example.bt;
 
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadsetClientCall;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -30,7 +31,7 @@ import android.widget.TextView;
  * Use the {@link PhoneFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class PhoneFragment extends AFragment implements View.OnClickListener,AdapterView.OnItemClickListener{
+public class PhoneFragment extends AFragment implements View.OnClickListener,AdapterView.OnItemClickListener,View.OnLongClickListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -39,6 +40,9 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    static final int MSG_UDPATE = 1;
+    static final int MSG_CONTACT = 2;
 
     private OnFragmentInteractionListener mListener;
     View root;
@@ -138,11 +142,12 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
         bt11.setOnClickListener(this);
         bt12.setOnClickListener(this);
         del.setOnClickListener(this);
+        del.setOnLongClickListener(this);
         call.setOnClickListener(this);
         hangup.setOnClickListener(this);
         audio.setOnClickListener(this);
 
-        number.setBackgroundColor(Color.GRAY);
+        number.setBackgroundColor(Color.WHITE);
         number.setTextSize(30);
         root = view;
 
@@ -151,8 +156,8 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
         btm.downLoadPhonebook();
 
         mhandler = new H();
-        Message msg = mhandler.obtainMessage(2);
-        mhandler. sendMessageDelayed(msg,5000);
+        Message msg = mhandler.obtainMessage(MSG_CONTACT);
+        mhandler. sendMessageDelayed(msg,10000);
         return view;
     }
 
@@ -199,6 +204,7 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
             btm.call(num);
             return;
         }else if(view.getId()==R.id.hangup){
+            btm.handup();
             return;
         }else if(view.getId()==R.id.audio){
             btm.switchAudio();
@@ -208,6 +214,8 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
             builder.append(c);
         int length = builder.length();
         number.setText(builder.subSequence(0,length));
+        if(btm.getCallState()!= BluetoothHeadsetClientCall.CALL_STATE_TERMINATED)
+            btm.dail((byte)c);
     }
 
     @Override
@@ -221,6 +229,32 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
     }
 
     public void updateInfo(){
+        if(btm.getCallState()!= BluetoothHeadsetClientCall.CALL_STATE_TERMINATED){
+            call.setBackgroundColor(Color.GREEN);
+            hangup.setBackgroundColor(Color.RED);
+            audio.setBackgroundColor(Color.WHITE);
+        }else{
+            call.setBackgroundColor(Color.WHITE);
+            hangup.setBackgroundColor(Color.WHITE);
+            audio.setBackgroundColor(Color.WHITE);
+        }
+        if(btm.getCallState()!= BluetoothHeadsetClientCall.CALL_STATE_INCOMING){
+            number.setText(btm.getNum());
+        }
+
+    }
+    public void getPhoneBook(){
+        Message msg = mhandler.obtainMessage(MSG_CONTACT);
+        mhandler.removeMessages(MSG_CONTACT);
+        mhandler. sendMessage(msg);
+    }
+
+    @Override
+    public boolean onLongClick(View view) {
+        if(view.getId()==R.id.delete){
+
+        }
+        return true;
     }
 
     class H extends Handler{
@@ -228,11 +262,11 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
         public void handleMessage(Message msg) {
             int what = msg.what;
             switch (what){
-                case 1:
+                case MSG_UDPATE:
                     String[][] info = (String[][])msg.obj;
                     mAdapter.add(info);
                     break;
-                case 2://start get contact from provider
+                case MSG_CONTACT://start get contact from provider
                     new DownloadAsynTask().execute();
                     break;
                 default:break;
@@ -249,7 +283,8 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            String[][] s = (String[][]) getItem(position);Log.i(TAG,"view name"+s[0][0]+"   num:"+s[0][1]);
+            String[][] s = (String[][]) getItem(position);
+            //Log.i(TAG,"view name"+s[0][0]+"   num:"+s[0][1]);
             View v = LayoutInflater.from(getContext()).inflate(viewId, null);
             TextView txtView = v.findViewById(R.id.textView5);
             txtView.setText(s[0][0]+"  "+s[0][1]);
@@ -279,6 +314,8 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
         @Override
         protected Boolean doInBackground(Void... paramArrayOfParams) {
             Context mContext = getContext();
+            if(mContext==null)
+                return true;
             //联系人的Uri，也就是content://com.android.contacts/contacts
             Uri uri = ContactsContract.RawContacts.CONTENT_URI;
             //指定获取_id和display_name两列数据，display_name即为姓名
@@ -317,7 +354,7 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
                             arr[i][1] =  num;
                         }while (phonesCusor.moveToNext());
                     }
-                    Message msg = mhandler.obtainMessage(1,new String[][]{arr[i]});
+                    Message msg = mhandler.obtainMessage(MSG_UDPATE,new String[][]{arr[i]});
                     mhandler.sendMessage(msg);
                     i++;
                 } while (cursor.moveToNext());

@@ -1,8 +1,11 @@
 package com.example.bt;
 
 import android.content.Context;
+import android.content.Intent;
+import android.media.MediaMetadata;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -95,8 +98,12 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
             mListener.onFragmentInteraction(uri);
         }
     }
-    public void updateInfo() {
-
+    public void updateInfo(MediaMetadata data) {
+        String artist = data.getString(MediaMetadata.METADATA_KEY_ARTIST);
+        String trackTitle = data.getString(MediaMetadata.METADATA_KEY_TITLE);
+        String album = data.getString(MediaMetadata.METADATA_KEY_ALBUM);
+        //title.setText();
+        info.setText("\t歌曲名:"+trackTitle+"\n"+"\t歌手:"+artist+"\n"+"\t专辑名:"+album);
     }
 
     @Override
@@ -116,6 +123,12 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
         }else if(view.getId()==R.id.next){
             btm.next();
         }
-        btm.getElement();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                btm.getElement();
+            }
+        }, 500);
+
     }
 }

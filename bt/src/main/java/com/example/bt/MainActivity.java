@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.MediaMetadata;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentManager;
@@ -111,6 +112,11 @@ public class MainActivity extends AppCompatActivity implements AFragment.OnFragm
     }
     static final int DEVICE_ADD=1;
     static final int DEVICE_STATE_CHANGE=2;
+    static final int MUSIC_STATE_CHANGE=3;
+    static final int PHONE_STATE_CHANGE=4;
+    static final int PHONEBOOTK_STATE_CHANGE=5;
+    static final int PHONEBOOK_DOWNLOAD=6;
+    static final int MUSIC_METADATA=7;
     class MyHandler extends Handler{
         @Override
         public void handleMessage(Message msg) {
@@ -123,8 +129,22 @@ public class MainActivity extends AppCompatActivity implements AFragment.OnFragm
                 case DEVICE_STATE_CHANGE:
                     device.updateState();
                     break;
+                case MUSIC_STATE_CHANGE:
+                    break;
+                case MUSIC_METADATA:
+                    music.updateInfo((MediaMetadata)msg.obj);
+                    break;
+                case PHONE_STATE_CHANGE:
+                    phone.updateInfo();
+                    break;
+                case PHONEBOOTK_STATE_CHANGE:
+                    phone.updateInfo();
+                    break;
+                case PHONEBOOK_DOWNLOAD:
+                    phone.getPhoneBook();
+                    break;
             }
-            super.handleMessage(msg);
+            //super.handleMessage(msg);
         }
     }
     public void sendMsg(int what,Object obj){

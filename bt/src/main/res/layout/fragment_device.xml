@@ -17,7 +17,7 @@
             android:layout_height="match_parent" />
 
         <RelativeLayout
-            android:layout_width="443dp"
+            android:layout_width="574dp"
             android:layout_height="match_parent">
 
             <Button
@@ -51,14 +51,16 @@
                 android:id="@+id/textView4"
                 android:layout_width="286dp"
                 android:layout_height="239dp"
-                android:layout_above="@+id/unpair"
+                android:layout_alignParentBottom="true"
                 android:layout_alignParentStart="true"
+                android:layout_marginBottom="22dp"
+                android:layout_marginStart="33dp"
                 android:text="current bounded device" />
 
             <Switch
                 android:id="@+id/switch1"
-                android:layout_width="329dp"
-                android:layout_height="80dp"
+                android:layout_width="277dp"
+                android:layout_height="61dp"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
                 android:layout_marginTop="19dp"
@@ -74,6 +76,18 @@
                 android:layout_alignStart="@+id/scan"
                 android:layout_marginBottom="68dp"
                 android:text="unpair" />
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="263dp"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/switch1"
+                android:layout_alignEnd="@+id/scan">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/name"
+                    android:layout_width="421dp"
+                    android:layout_height="wrap_content" />
+            </android.support.design.widget.TextInputLayout>
         </RelativeLayout>
 
     </LinearLayout>

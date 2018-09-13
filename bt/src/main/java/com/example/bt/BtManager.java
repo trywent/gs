@@ -14,6 +14,8 @@ import android.bluetooth.BluetoothHeadsetClient;
 import android.bluetooth.BluetoothHeadsetClientCall;
 import android.bluetooth.BluetoothPbapClient;
 import android.bluetooth.BluetoothProfile;
+import android.media.MediaMetadata;
+import android.media.Metadata;
 import android.os.Handler;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -37,6 +39,7 @@ public class BtManager implements BluetoothProfile.ServiceListener{
     BluetoothHeadsetClient hfpclient;
     BluetoothPbapClient pbap;
 
+    boolean connectting;
 
     public BtManager(MainActivity context){
         HandlerThread ht = new HandlerThread("btm");
@@ -52,6 +55,8 @@ public class BtManager implements BluetoothProfile.ServiceListener{
         mAdapter.getProfileProxy(context, this,BluetoothProfile.AVRCP_CONTROLLER);
         mAdapter.getProfileProxy(context, this,BluetoothProfile.PBAP_CLIENT);
         mAdapter.getProfileProxy(context, this,BluetoothProfile.HEADSET_CLIENT);
+        mAdapter.setScanMode(BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE,120);
+
     }
     public static BtManager getInstance(MainActivity context){
         if(instance==null) {
@@ -69,7 +74,17 @@ public class BtManager implements BluetoothProfile.ServiceListener{
             mAdapter.disable();
         }
     }
+
+    public String getName(){
+        return mAdapter.getName();
+    }
+    public void setName(String name){
+        mAdapter.setName(name);
+    }
     public boolean startDiscover(){
+        if(mAdapter.isDiscovering()){
+            mAdapter.cancelDiscovery();
+        }
         if(!mAdapter.isDiscovering()&&!isDeviceBusy()){
             Log.i(TAG,"startDiscovery");
             return mAdapter.startDiscovery();
@@ -77,13 +92,14 @@ public class BtManager implements BluetoothProfile.ServiceListener{
         return false;
     }
 
-    public void release(){
+    public void release() {
         Log.i(TAG,"btm release");
         mctx.unregisterReceiver(mReceiver);
         mAdapter.closeProfileProxy(BluetoothProfile.A2DP_SINK,a2dpsink);
         mAdapter.closeProfileProxy(BluetoothProfile.AVRCP_CONTROLLER,avrcp);
         mAdapter.closeProfileProxy(BluetoothProfile.PBAP_CLIENT,pbap);
         mAdapter.closeProfileProxy(BluetoothProfile.HEADSET_CLIENT,hfpclient);
+        instance=null;
     }
     /*
     * device state
@@ -128,22 +144,26 @@ public class BtManager implements BluetoothProfile.ServiceListener{
     //blueooth device
 
     public void connectDevice(BluetoothDevice bd){
+        if(connectting)
+            return;
+        connectting = true;
         if(mAdapter.isDiscovering()){
             mAdapter.cancelDiscovery();
         }
-        if(mDevice!=null&&mDevice!=bd){
+        if(mDevice!=null&&bd!=null&&mDevice!=bd){
             if(mDevice.getBondState()==BluetoothDevice.BOND_BONDING)
                 mDevice.cancelBondProcess();
 
             disconDevice(false);
         }
-        mDevice = bd;
-        Log.i(TAG,"connectDevice state 0x"+Integer.toHexString(bd.getBondState()));
-        if(bd.getBondState()!=BluetoothDevice.BOND_BONDED&&bd.getBondState()!=BluetoothDevice.BOND_BONDING) {
-            bd.createBond();
-        }else if(bd.getBondState()==BluetoothDevice.BOND_BONDED){
+        mDevice = bd!=null?bd:mDevice;
+        Log.i(TAG,"connectDevice" +mDevice.getName() + " state "+mDevice.getBondState());
+        if(mDevice.getBondState()!=BluetoothDevice.BOND_BONDED&&mDevice.getBondState()!=BluetoothDevice.BOND_BONDING) {
+            mDevice.createBond();
+        }else if(mDevice.getBondState()==BluetoothDevice.BOND_BONDED){
             connectProfile();
         }
+        connectting = false;
     }
     public void disconDevice(boolean unPair){
 
@@ -183,14 +203,51 @@ public class BtManager implements BluetoothProfile.ServiceListener{
     public boolean isSameDeivce(BluetoothDevice bd){
         return mDevice!=null&&bd!=null&&mDevice.getAddress().equals(bd.getAddress());
     }
-
+    public boolean isconneted(BluetoothDevice bd){
+        if(bd==null)
+            return false;
+        boolean hfp = hfpclient!=null?hfpclient.getConnectionState(bd)==BluetoothProfile.STATE_CONNECTED:false;
+        boolean avr = avrcp!=null?avrcp.getConnectionState(bd)==BluetoothProfile.STATE_CONNECTED:false;
+        boolean a2dp = a2dpsink!=null?a2dpsink.getConnectionState(bd)==BluetoothProfile.STATE_CONNECTED:false;
+        return hfp||avr||a2dp;
+    }
+    public void autoConnect(){
+        Set<BluetoothDevice> blueSet = getPairedDevice();
+        if(blueSet!=null&&!blueSet.isEmpty()) {
+            BluetoothDevice bd = null;
+            for(Iterator<BluetoothDevice> it = blueSet.iterator(); it.hasNext();) {
+                BluetoothDevice d = (BluetoothDevice) it.next();
+                if(bd==null)
+                    bd = d;
+                if(isconneted(d)){
+                    bd =d;
+                    break;
+                }
+            }
+            connectDevice(bd);
+        }
+    }
     //profile avrcp a2dpsink pbap hfpclient
     public void connectProfile(){
         Log.i(TAG,"connectProfile");
-        if(a2dpsink!=null)
-            a2dpsink.connect(mDevice);
-        if(hfpclient!=null)
-            hfpclient.connect(mDevice);
+        int state;
+        if(a2dpsink!=null){
+            state = a2dpsink.getConnectionState(mDevice);
+            if(state==BluetoothProfile.STATE_DISCONNECTED||state==BluetoothProfile.STATE_DISCONNECTING){
+                a2dpsink.connect(mDevice);
+                Log.i(TAG,"connectProfile a2dp");
+            }
+        }
+
+        if(hfpclient!=null){
+            state = hfpclient.getConnectionState(mDevice);
+            if(state==BluetoothProfile.STATE_DISCONNECTED||state==BluetoothProfile.STATE_DISCONNECTING){
+                hfpclient.connect(mDevice);
+                Log.i(TAG,"connectProfile hfpclient");
+            }
+
+        }
+
     }
     //a2dpclient
     public boolean isPlaying(){
@@ -237,8 +294,10 @@ public class BtManager implements BluetoothProfile.ServiceListener{
         int state = hfpclient.getAudioState(mDevice);
         if(state==BluetoothHeadsetClient.STATE_AUDIO_DISCONNECTED){
             hfpclient.connectAudio(mDevice);
-        }else{
+            Log.i(TAG,"connectAudio");
+        }else if(state==BluetoothHeadsetClient.STATE_AUDIO_CONNECTED){
             hfpclient.disconnectAudio(mDevice);
+            Log.i(TAG,"disconnectAudio");
         }
     }
     public void call(String num){
@@ -261,9 +320,61 @@ public class BtManager implements BluetoothProfile.ServiceListener{
     public void accept(){
         if(hfpclient==null)
             return;
+
+        List<BluetoothHeadsetClientCall> cur = hfpclient.getCurrentCalls(mDevice);
+        if(cur==null)
+            return ;
+        for(BluetoothHeadsetClientCall call:cur){
+            if(call.getState()==BluetoothHeadsetClientCall.CALL_STATE_INCOMING){
+                break;
+            }
+            return;
+        }
         hfpclient.acceptCall(mDevice,0);
     }
+    /*
+    * 获取电话状态
+    * BluetoothHeadsetClientCall.CALL_STATE_ACTIVE
+    * CALL_STATE_HELD             保留当前不挂断,接听另一个电话
+    * CALL_STATE_DIALING
+    * CALL_STATE_INCOMING
+    * CALL_STATE_TERMINATED
+    *
+    * */
+    public int getCallState(){
+        if(hfpclient==null)
+            return BluetoothHeadsetClientCall.CALL_STATE_TERMINATED;
 
+        List<BluetoothHeadsetClientCall> cur = hfpclient.getCurrentCalls(mDevice);
+        if(cur==null)
+            return BluetoothHeadsetClientCall.CALL_STATE_TERMINATED;
+        for(BluetoothHeadsetClientCall call:cur){
+            int state = call.getState();
+            if(state!=BluetoothHeadsetClientCall.CALL_STATE_TERMINATED){
+                return state;
+            }
+        }
+        return BluetoothHeadsetClientCall.CALL_STATE_TERMINATED;
+    }
+    public void dail(byte code){
+        if(hfpclient==null)
+            return;
+        hfpclient.sendDTMF(mDevice,code);
+    }
+    public String getNum(){
+        if(hfpclient==null)
+            return "no  call";
+        List<BluetoothHeadsetClientCall> cur = hfpclient.getCurrentCalls(mDevice);
+        if(cur==null)
+            return "no call";
+        for(BluetoothHeadsetClientCall call:cur){
+            int state = call.getState();
+            if(state!=BluetoothHeadsetClientCall.CALL_STATE_INCOMING){
+                return call.getNumber();
+            }
+        }
+        return "no call";
+    }
     //pbap
     public void downLoadPhonebook(){
         if(pbap!=null)
@@ -284,6 +395,10 @@ public class BtManager implements BluetoothProfile.ServiceListener{
             case BluetoothProfile.HEADSET_CLIENT:
                 hfpclient = (BluetoothHeadsetClient) bluetoothProfile;
                 break;
+        }
+        if(a2dpsink!=null&&avrcp!=null&&hfpclient!=null){
+            autoConnect();
+            mctx.sendMsg(MainActivity.DEVICE_STATE_CHANGE,null);
         }
     }
 
@@ -306,7 +421,19 @@ public class BtManager implements BluetoothProfile.ServiceListener{
     }
 
 
-    //
+    /*
+    * 处理蓝牙状态
+    * 连接:
+    *
+    * hfpclient:
+    *
+    * a2dpsink:
+    *
+    * avrcp:
+    *
+    * pbap:
+    *
+    * */
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -329,9 +456,11 @@ public class BtManager implements BluetoothProfile.ServiceListener{
             }else if(BluetoothDevice.ACTION_BOND_STATE_CHANGED .equals(action)){
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 String state = intent.getStringExtra(BluetoothDevice.EXTRA_BOND_STATE );
+                mctx.sendMsg(MainActivity.DEVICE_STATE_CHANGE,null);
             }else if(BluetoothDevice.ACTION_NAME_CHANGED  .equals(action)){
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 String name = intent.getStringExtra(BluetoothDevice.EXTRA_NAME );
+                mctx.sendMsg(MainActivity.DEVICE_STATE_CHANGE,null);
             }else if(BluetoothA2dpSink.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {//a2dpclitent
                 mctx.sendMsg(MainActivity.DEVICE_STATE_CHANGE,null);
             }else if(BluetoothA2dpSink.ACTION_PLAYING_STATE_CHANGED.equals(action)){
@@ -339,20 +468,37 @@ public class BtManager implements BluetoothProfile.ServiceListener{
             }else if(BluetoothAvrcpController.ACTION_CONNECTION_STATE_CHANGED.equals(action)){//avrcp
                 mctx.sendMsg(MainActivity.DEVICE_STATE_CHANGE,null);
             }else if(BluetoothAvrcpController.ACTION_TRACK_EVENT.equals(action)){
-
+                MediaMetadata data = intent.getParcelableExtra("android.bluetooth.avrcp-controller.profile.extra.METADATA");
+                //Log.i(TAG,"metadata "+data);
+                if(data!=null)
+                mctx.sendMsg(MainActivity.MUSIC_METADATA,data);
             }else if("com.android.getelementattrrsp".equals(action)){
                 String artist = intent.getStringExtra("artist");
                 String trackTitle = intent.getStringExtra("trackTitle");
                 String album = intent.getStringExtra("album");
                 Log.i(TAG,"getElementAttrRsp,artist: " + artist + ",trackTitle: " + trackTitle + ",album: " + album);
+                MediaMetadata data = new MediaMetadata.Builder().putString(MediaMetadata.METADATA_KEY_ARTIST,artist)
+                        .putString(MediaMetadata.METADATA_KEY_TITLE,trackTitle)
+                        .putString(MediaMetadata.METADATA_KEY_ALBUM,album).build();
+                mctx.sendMsg(MainActivity.MUSIC_METADATA,data);
             }else if(BluetoothHeadsetClient.ACTION_CONNECTION_STATE_CHANGED.equals(action)){//hfpclient
+                int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,BluetoothProfile.STATE_DISCONNECTED);
+                if(state==BluetoothProfile.STATE_CONNECTED){
+                    if(!isconneted(mDevice))
+                        autoConnect();
+                }
                 mctx.sendMsg(MainActivity.DEVICE_STATE_CHANGE,null);
             }else if(BluetoothHeadsetClient.ACTION_AUDIO_STATE_CHANGED.equals(action)){
                 mctx.sendMsg(MainActivity.DEVICE_STATE_CHANGE,null);
             }else if(BluetoothHeadsetClient.ACTION_CALL_CHANGED.equals(action)){
-
+                BluetoothHeadsetClientCall c =intent.getParcelableExtra(BluetoothHeadsetClient.EXTRA_CALL);
+                //Log.i(TAG,"action "+c.toString());
+                mctx.sendMsg(MainActivity.PHONE_STATE_CHANGE
+                        ,null);
             }else if(BluetoothPbapClient.ACTION_CONNECTION_STATE_CHANGED.equals(action)){//pbap
 
+            }else if("com.lsec.pbap_downloaded".equals(action)){
+                mctx.sendMsg(MainActivity.PHONEBOOK_DOWNLOAD,null);
             }
         }
     };
@@ -377,6 +523,7 @@ public class BtManager implements BluetoothProfile.ServiceListener{
         filter.addAction(BluetoothHeadsetClient.ACTION_CALL_CHANGED);
         //pbap
         filter.addAction(BluetoothPbapClient.ACTION_CONNECTION_STATE_CHANGED);
+        filter.addAction("com.lsec.pbap_downloaded");
 
         mctx.registerReceiver(mReceiver,filter,null,mHandler);
     }

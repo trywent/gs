@@ -12,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -32,7 +33,7 @@ import java.util.Set;
  * create an instance of this fragment.
  */
 public class DeviceFragment extends AFragment implements AdapterView.OnItemSelectedListener , CompoundButton.OnCheckedChangeListener
-    ,View.OnClickListener,AdapterView.OnItemClickListener {
+    ,View.OnClickListener,AdapterView.OnItemClickListener ,View.OnFocusChangeListener {
     Switch bluetoothSwitch;
     Button scan;
     Button connect;
@@ -44,6 +45,8 @@ public class DeviceFragment extends AFragment implements AdapterView.OnItemSelec
     List<BluetoothDevice> cachedDevcie;
     View root;
     View selectedView;
+    EditText editText;
+
     BluetoothDevice curbd;
 
     public DeviceFragment() {
@@ -89,6 +92,10 @@ public class DeviceFragment extends AFragment implements AdapterView.OnItemSelec
         devices.setOnItemClickListener(this);
         mAdapter = new MyAdapter<BluetoothDevice>(getContext(),R.layout.mlist);
         devices.setAdapter(mAdapter);
+
+        editText = v.findViewById(R.id.name);
+        editText.setText(btm.getName());
+        editText.setOnFocusChangeListener(this);
         if(btm.isEnabled()) {
             bluetoothSwitch.setChecked(true);
             bluetoothSwitch.setText("bluetooth on");
@@ -142,8 +149,6 @@ public class DeviceFragment extends AFragment implements AdapterView.OnItemSelec
             cachedDevcie.clear();
             btm.startDiscover();
         }else if(view.getId()==R.id.conn){
-            if(curbd==null)
-                return;
             btm.connectDevice(curbd);
         }else if(view.getId()==R.id.disconn){
             btm.disconDevice(false);
@@ -172,6 +177,13 @@ public class DeviceFragment extends AFragment implements AdapterView.OnItemSelec
         selectedView = view;
         selectedView.setBackgroundColor(Color.GRAY);
         curbd = (BluetoothDevice)adapterView.getItemAtPosition(i);
+    }
+
+    @Override
+    public void onFocusChange(View view, boolean b) {
+        if(view.getId()==R.id.name&&b==false){
+            btm.setName(new String(editText.getText().toString()));
+        }
     }
 
     class MyAdapter<T> extends ArrayAdapter{
