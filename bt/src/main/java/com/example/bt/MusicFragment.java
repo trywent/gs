@@ -103,6 +103,7 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
         String trackTitle = data.getString(MediaMetadata.METADATA_KEY_TITLE);
         String album = data.getString(MediaMetadata.METADATA_KEY_ALBUM);
         //title.setText();
+        if(info!=null)
         info.setText("\t歌曲名:"+trackTitle+"\n"+"\t歌手:"+artist+"\n"+"\t专辑名:"+album);
     }
 

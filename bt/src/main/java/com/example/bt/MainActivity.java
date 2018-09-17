@@ -33,8 +33,10 @@ public class MainActivity extends AppCompatActivity implements AFragment.OnFragm
     FragmentManager mFragmentManager;
     BtManager btm;
     Handler mHandler;
+    boolean isResumed = false;
+
     public MainActivity(){}
-    void swtichFragment(Fragment fg){
+    void switchFragment(Fragment fg){
         mFragmentManager.beginTransaction().replace(R.id.fragment, fg).commit();
     }
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -48,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements AFragment.OnFragm
                     if(device==null) {
                         device = new DeviceFragment();//AFragment.newInstance("device","1");
                     }
-                    swtichFragment(device);
+                    switchFragment(device);
                     return true;
                 case R.id.navigation_music:
                     //mTextMessage.setText(R.string.title_music);
@@ -56,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements AFragment.OnFragm
                         music = new MusicFragment();//AFragment.newInstance("music","2");
                         music.setBtManager(btm);
                     }
-                    swtichFragment(music);
+                    switchFragment(music);
                     return true;
                 case R.id.navigation_phone:
                     //mTextMessage.setText(R.string.title_phone);
@@ -64,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements AFragment.OnFragm
                         phone = new PhoneFragment();//AFragment.newInstance("phone","3");
                         phone.setBtManager(btm);
                     }
-                    swtichFragment(phone);
+                    switchFragment(phone);
                     return true;
             }
             return false;
@@ -94,10 +96,22 @@ public class MainActivity extends AppCompatActivity implements AFragment.OnFragm
         mFragmentManager = getSupportFragmentManager();
         //Fragment fg = mFragmentManager.findFragmentById(R.id.fragment);
         //mFragmentManager.beginTransaction().remove(fg).commit();
-        if(device==null)
-            device = new DeviceFragment();
-        swtichFragment(device);
-        requestPer();
+        device = new DeviceFragment();
+        music = new MusicFragment();
+        music.setBtManager(btm);
+        phone = new PhoneFragment();
+        phone.setBtManager(btm);
+        switchFragment(device);
+
+        requestPermission();
+    }
+    protected void onPause(){
+        super.onPause();
+        isResumed = false;
+    }
+    protected void onResume(){
+        super.onResume();
+        isResumed = true;
     }
 
     @Override
@@ -120,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements AFragment.OnFragm
     class MyHandler extends Handler{
         @Override
         public void handleMessage(Message msg) {
+
             int event = msg.what;
             switch (event){
                 case DEVICE_ADD:
@@ -136,6 +151,8 @@ public class MainActivity extends AppCompatActivity implements AFragment.OnFragm
                     break;
                 case PHONE_STATE_CHANGE:
                     phone.updateInfo();
+                    if(isResumed)
+                        switchFragment(phone);
                     break;
                 case PHONEBOOTK_STATE_CHANGE:
                     phone.updateInfo();
@@ -155,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements AFragment.OnFragm
         }
 
     }
-    private void requestPer(){
+    private void requestPermission(){
         String[] per = new String[]{
                 Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.READ_CONTACTS,

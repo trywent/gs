@@ -158,6 +158,7 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
         mhandler = new H();
         Message msg = mhandler.obtainMessage(MSG_CONTACT);
         mhandler. sendMessageDelayed(msg,10000);
+        updateInfo();
         return view;
     }
 
@@ -229,6 +230,9 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
     }
 
     public void updateInfo(){
+        if(root==null){
+            return;
+        }
         if(btm.getCallState()!= BluetoothHeadsetClientCall.CALL_STATE_TERMINATED){
             call.setBackgroundColor(Color.GREEN);
             hangup.setBackgroundColor(Color.RED);
@@ -239,7 +243,9 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
             audio.setBackgroundColor(Color.WHITE);
         }
         if(btm.getCallState()!= BluetoothHeadsetClientCall.CALL_STATE_INCOMING){
-            number.setText(btm.getNum());
+            String n = btm.getNum();
+            if(n!=null)
+            number.setText(n);
         }
 
     }

@@ -33,9 +33,9 @@ public class AFragment extends Fragment{
     public AFragment() {
         // Required empty public constructor
     }
-    public void setBtManager(BtManager btm) {
+    public void setBtManager(BtManager bm) {
         // Required empty public constructor
-        btm = btm;
+        btm = bm;
     }
     /**
      * Use this factory method to create a new instance of
