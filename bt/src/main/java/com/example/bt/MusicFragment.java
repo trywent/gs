@@ -3,14 +3,17 @@ package com.example.bt;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaMetadata;
+import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 
@@ -38,6 +41,10 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
     Button pre,play,next;
     TextView title;
     TextView info;
+    SeekBar progress;
+    int trackNum=0;
+    int trackTotal=0;
+    long duration = 0;
 
     boolean playing=false;
 
@@ -84,6 +91,9 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
         next = root.findViewById(R.id.next);
         title = root.findViewById(R.id.title);
         info = root.findViewById(R.id.info);
+        progress = root.findViewById(R.id.seekBar);
+        progress.setMax(100);
+        progress.setMin(0);
 
         pre.setOnClickListener(this);
         play.setOnClickListener(this);
@@ -98,25 +108,56 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
             mListener.onFragmentInteraction(uri);
         }
     }
-    public void updateInfo(MediaMetadata data) {
-        String artist = data.getString(MediaMetadata.METADATA_KEY_ARTIST);
-        String trackTitle = data.getString(MediaMetadata.METADATA_KEY_TITLE);
-        String album = data.getString(MediaMetadata.METADATA_KEY_ALBUM);
-        //title.setText();
-        if(info!=null)
-        info.setText("\t歌曲名:"+trackTitle+"\n"+"\t歌手:"+artist+"\n"+"\t专辑名:"+album);
-    }
 
+    public void updateInfo(MediaMetadata data) {
+        int curTrackNum = (int)data.getLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER);
+        int curTrackTotal = (int)data.getLong(MediaMetadata.METADATA_KEY_NUM_TRACKS);
+        int curDuration = (int)data.getLong(MediaMetadata.METADATA_KEY_DURATION);
+        if(trackNum!=curTrackNum||trackTotal!=curTrackTotal||duration!=curDuration){
+            trackNum = curTrackNum;
+            trackTotal = curTrackTotal;
+            duration = curDuration;
+            String artist = data.getString(MediaMetadata.METADATA_KEY_ARTIST);
+            String trackTitle = data.getString(MediaMetadata.METADATA_KEY_TITLE);
+            String album = data.getString(MediaMetadata.METADATA_KEY_ALBUM);
+            if(info!=null)
+                info.setText("\t歌曲名:"+trackTitle+"\n"+"\t歌手:"+artist+"\n"+"\t专辑名:"+album +"\n\t歌曲长度:"+duration);
+            if(title!=null)
+                title.setText(" ");
+        }else{
+            String trackTitle = data.getString(MediaMetadata.METADATA_KEY_TITLE);
+            if(title!=null)
+            title.setText(trackTitle);
+        }
+    }
+    public void updateState(PlaybackState state){
+        if(play==null||progress==null)
+            return;
+        if(state.getState()==PlaybackState.STATE_PLAYING){
+            play.setText("pause");
+            playing = true;
+        }
+        else{
+            play.setText("play");
+            playing = false;
+        }
+        long pos = state.getPosition();
+        if(duration>0&&pos>0){
+            long val = (100*pos)/duration;
+            //Log.i("BTM","duration "+state.getPosition()+"val "+val);
+            progress.setProgress((int)val);
+        }
+    }
     @Override
     public void onClick(View view) {
         if(view.getId()==R.id.play){
-            playing = btm.isPlaying();
+            //playing = btm.isPlaying();
             if(playing){
                 btm.pause();
-                play.setText("play");
+                //play.setText("play");
             }else{
                 btm.play();
-                play.setText("pause");
+                //play.setText("pause");
             }
 
         }else if(view.getId()==R.id.pre){
@@ -124,12 +165,12 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
         }else if(view.getId()==R.id.next){
             btm.next();
         }
-        new Handler().postDelayed(new Runnable() {
+        /*new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 btm.getElement();
             }
-        }, 500);
+        }, 500);*/
 
     }
 }

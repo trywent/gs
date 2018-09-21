@@ -20,17 +20,13 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.MediaPlayer;
-import android.media.Metadata;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
+import android.media.session.PlaybackState;
 import android.os.Handler;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.HandlerThread;
-import android.provider.MediaStore;
 import android.util.Log;
 
 
@@ -250,11 +246,8 @@ public class BtManager implements BluetoothProfile.ServiceListener {
         if (blueSet != null && !blueSet.isEmpty()) {
             BluetoothDevice bd = null;
             for (Iterator<BluetoothDevice> it = blueSet.iterator(); it.hasNext(); ) {
-                BluetoothDevice d = (BluetoothDevice) it.next();
-                if (bd == null)
-                    bd = d;
-                if (isconneted(d)) {
-                    bd = d;
+                bd = (BluetoothDevice) it.next();
+                if (isconneted(bd)) {
                     break;
                 }
             }
@@ -424,14 +417,16 @@ public class BtManager implements BluetoothProfile.ServiceListener {
     }
     private void playRing(Boolean play){
         if (play) {
+            Log.d(TAG,"start ring");
             if (mPlayer==null) {
-                Log.d(TAG,"start ring");
                 AudioAttributes attr = new AudioAttributes.Builder()
                         .setUsage(AudioAttributes.USAGE_MEDIA)
                         .build();
                 int session = mAudioManager.generateAudioSessionId();
                 mPlayer = MediaPlayer.create(mctx,R.raw.ring,attr,session);
-                mPlayer.setLooping(true);
+                //mPlayer.setLooping(true);
+                mPlayer.start();
+            }else if(!mPlayer.isPlaying()){
                 mPlayer.start();
             }
         } else {
@@ -539,9 +534,12 @@ public class BtManager implements BluetoothProfile.ServiceListener {
                 mctx.sendMsg(MainActivity.DEVICE_STATE_CHANGE, null);
             } else if (BluetoothAvrcpController.ACTION_TRACK_EVENT.equals(action)) {
                 MediaMetadata data = intent.getParcelableExtra("android.bluetooth.avrcp-controller.profile.extra.METADATA");
+                PlaybackState state = intent.getParcelableExtra("android.bluetooth.avrcp-controller.profile.extra.PLAYBACK");
                 //Log.i(TAG,"metadata "+data);
                 if (data != null)
                     mctx.sendMsg(MainActivity.MUSIC_METADATA, data);
+                if(state !=null)
+                    mctx.sendMsg(MainActivity.MUSIC_STATE_CHANGE, state);
             } else if ("com.android.getelementattrrsp".equals(action)) {
                 String artist = intent.getStringExtra("artist");
                 String trackTitle = intent.getStringExtra("trackTitle");

@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.MediaMetadata;
+import android.media.session.PlaybackState;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentManager;
@@ -145,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements AFragment.OnFragm
                     device.updateState();
                     break;
                 case MUSIC_STATE_CHANGE:
+                    music.updateState((PlaybackState)msg.obj);
                     break;
                 case MUSIC_METADATA:
                     music.updateInfo((MediaMetadata)msg.obj);

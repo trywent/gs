@@ -50,23 +50,30 @@
             <TextView
                 android:id="@+id/title"
                 android:layout_width="match_parent"
-                android:layout_height="306dp"
+                android:layout_height="233dp"
                 android:layout_above="@+id/pre"
                 android:layout_alignEnd="@+id/next"
                 android:layout_alignLeft="@+id/pre"
                 android:layout_alignParentTop="true"
                 android:layout_alignRight="@+id/next"
                 android:layout_alignStart="@+id/pre"
+                android:layout_marginBottom="73dp"
                 android:layout_marginEnd="-171dp"
                 android:layout_marginRight="-171dp"
-                android:layout_marginTop="125dp" />
+                android:layout_marginTop="125dp"
+                android:gravity="center"
+                android:textAllCaps="false"
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/info"
                 android:layout_width="match_parent"
                 android:layout_height="124dp"
                 android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true" />
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="0dp"
+                android:textAlignment="center" />
 
             <Button
                 android:id="@+id/button2"
@@ -76,6 +83,15 @@
                 android:layout_alignTop="@+id/pre"
                 android:layout_marginEnd="32dp"
                 android:text="Button" />
+
+            <SeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="474dp"
+                android:layout_height="wrap_content"
+                android:layout_alignEnd="@+id/pre"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="116dp"
+                android:layout_marginEnd="-418dp" />
 
         </RelativeLayout>
 
