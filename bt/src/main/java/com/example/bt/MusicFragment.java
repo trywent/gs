@@ -3,6 +3,7 @@ package com.example.bt;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaMetadata;
+import android.media.browse.MediaBrowser;
 import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,7 +13,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -38,10 +41,15 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
     private OnFragmentInteractionListener mListener;
 
     View root;
-    Button pre,play,next;
+    Button pre,play,next,butt;
     TextView title;
     TextView info;
     SeekBar progress;
+    ArrayAdapter<MediaBrowser.MediaItem> mAdapter;
+    ListView playlist;
+    String artist;
+    String trackTitle;
+    String album;
     int trackNum=0;
     int trackTotal=0;
     long duration = 0;
@@ -78,19 +86,35 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
-
+    public void onStop(){
+        super.onStop();
+    }
+    public void onDestroy(){
+        super.onDestroy();
+    }
+    public void onDetach(){
+        super.onDetach();
+        //if(playing)
+        //    btm.pause();
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        if(root!=null)
+        if(root!=null) {
+            btm.play();
             return root;
+        }
         root =  inflater.inflate(R.layout.fragment_music, container, false);
         pre = root.findViewById(R.id.pre);
         play = root.findViewById(R.id.play);
         next = root.findViewById(R.id.next);
+        butt = root.findViewById(R.id.button2);
         title = root.findViewById(R.id.title);
         info = root.findViewById(R.id.info);
+        mAdapter = new MyAdapter<MediaBrowser.MediaItem>(getContext(),R.layout.mlist);
+        playlist = root.findViewById(R.id.playlist);
+        playlist.setAdapter(mAdapter);
         progress = root.findViewById(R.id.seekBar);
         progress.setMax(100);
         progress.setMin(0);
@@ -98,7 +122,8 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
         pre.setOnClickListener(this);
         play.setOnClickListener(this);
         next.setOnClickListener(this);
-
+        butt.setOnClickListener(this);
+        btm.play();
         return root;
     }
 
@@ -113,17 +138,28 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
         int curTrackNum = (int)data.getLong(MediaMetadata.METADATA_KEY_TRACK_NUMBER);
         int curTrackTotal = (int)data.getLong(MediaMetadata.METADATA_KEY_NUM_TRACKS);
         int curDuration = (int)data.getLong(MediaMetadata.METADATA_KEY_DURATION);
-        if(trackNum!=curTrackNum||trackTotal!=curTrackTotal||duration!=curDuration){
+        if(trackNum!=curTrackNum||trackTotal!=curTrackTotal){
+            Log.i("BTM","duration "+duration+" curdur "+curDuration+" track "+trackNum+" total "+trackTotal);
             trackNum = curTrackNum;
             trackTotal = curTrackTotal;
             duration = curDuration;
-            String artist = data.getString(MediaMetadata.METADATA_KEY_ARTIST);
-            String trackTitle = data.getString(MediaMetadata.METADATA_KEY_TITLE);
-            String album = data.getString(MediaMetadata.METADATA_KEY_ALBUM);
+            artist = data.getString(MediaMetadata.METADATA_KEY_ARTIST);
+            trackTitle = data.getString(MediaMetadata.METADATA_KEY_TITLE);
+            album = data.getString(MediaMetadata.METADATA_KEY_ALBUM);
+            int s = (int)(duration/1000.0);
+            int min = (int)(s/60.0);
+            int sec = s%60;
             if(info!=null)
-                info.setText("\t歌曲名:"+trackTitle+"\n"+"\t歌手:"+artist+"\n"+"\t专辑名:"+album +"\n\t歌曲长度:"+duration);
+                info.setText("\t歌曲名:"+trackTitle+"\n"+"\t歌手:"+artist+"\n"+"\t专辑名:"+album +"\n\t歌曲长度:"+min+"m"+sec+"s");
             if(title!=null)
                 title.setText(" ");
+        }else if((curDuration>0&&duration != curDuration)){//有些播放器时间第二次才正确.
+            duration = curDuration;
+            int s = (int)(duration/1000.0);
+            int min = (int)(s/60.0);
+            int sec = s%60;
+            if(info!=null)
+                info.setText("\t歌曲名:"+trackTitle+"\n"+"\t歌手:"+artist+"\n"+"\t专辑名:"+album +"\n\t歌曲长度:"+min+"m"+sec+"s");
         }else{
             String trackTitle = data.getString(MediaMetadata.METADATA_KEY_TITLE);
             if(title!=null)
@@ -133,6 +169,7 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
     public void updateState(PlaybackState state){
         if(play==null||progress==null)
             return;
+        Log.i("BTM","state "+state.getState());
         if(state.getState()==PlaybackState.STATE_PLAYING){
             play.setText("pause");
             playing = true;
@@ -153,9 +190,12 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
         if(view.getId()==R.id.play){
             //playing = btm.isPlaying();
             if(playing){
+                //btm.stop();
+                playing = false;
                 btm.pause();
                 //play.setText("play");
             }else{
+                playing = true;
                 btm.play();
                 //play.setText("pause");
             }
@@ -164,6 +204,9 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
             btm.prev();
         }else if(view.getId()==R.id.next){
             btm.next();
+        }else if(view.getId()==R.id.button2){
+            btm.pause();
+            //btm.getPlaylist();
         }
         /*new Handler().postDelayed(new Runnable() {
             @Override
@@ -172,5 +215,25 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
             }
         }, 500);*/
 
+    }
+    class MyAdapter<T> extends ArrayAdapter {
+        int viewId;
+        public MyAdapter(Context ctx,int res){
+            super(ctx,res);
+            viewId = res;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            MediaBrowser.MediaItem media = (MediaBrowser.MediaItem) getItem(position);
+            View v = LayoutInflater.from(getContext()).inflate(viewId, null);
+            TextView txtView = v.findViewById(R.id.textView5);
+            txtView.setText(media.getDescription().getTitle());
+            return txtView;
+        }
+    }
+    public void stopPlay(){
+        if(playing)
+            btm.pause();
     }
 }

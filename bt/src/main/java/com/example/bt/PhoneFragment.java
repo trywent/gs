@@ -104,6 +104,7 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
         // Inflate the layout for this fragment
 
         if(root!=null){
+            //btm.pause();
             return root;
         }
         builder = new StringBuilder();
@@ -159,6 +160,7 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
         Message msg = mhandler.obtainMessage(MSG_CONTACT);
         mhandler. sendMessageDelayed(msg,10000);
         updateInfo();
+        btm.pause();
         return view;
     }
 

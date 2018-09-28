@@ -108,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements AFragment.OnFragm
     }
     protected void onPause(){
         super.onPause();
+        music.stopPlay();
         isResumed = false;
     }
     protected void onResume(){
@@ -120,7 +121,9 @@ public class MainActivity extends AppCompatActivity implements AFragment.OnFragm
         super.onDestroy();
         btm.release();
     }
-
+    public void onBackPressed(){
+        finish();
+    }
     @Override
     public void onFragmentInteraction(Uri uri) {
 

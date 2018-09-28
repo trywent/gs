@@ -25,8 +25,9 @@
                 android:id="@+id/call"
                 android:layout_width="100dp"
                 android:layout_height="40dp"
+                android:layout_alignParentBottom="true"
                 android:layout_alignParentStart="true"
-                android:layout_alignTop="@+id/hangup"
+                android:layout_marginBottom="155dp"
                 android:layout_marginStart="33dp"
                 android:text="call" />
 
@@ -34,8 +35,8 @@
                 android:id="@+id/hangup"
                 android:layout_width="100dp"
                 android:layout_height="40dp"
-                android:layout_alignStart="@+id/num2"
-                android:layout_alignTop="@+id/audio"
+                android:layout_alignTop="@+id/call"
+                android:layout_centerHorizontal="true"
                 android:text="hang up" />
 
             <TextView
@@ -55,9 +56,9 @@
                 android:id="@+id/audio"
                 android:layout_width="100dp"
                 android:layout_height="40dp"
-                android:layout_alignEnd="@+id/delete"
-                android:layout_alignParentBottom="true"
-                android:layout_marginBottom="64dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignTop="@+id/call"
+                android:layout_marginEnd="29dp"
                 android:text="audio" />
 
             <Button
@@ -74,9 +75,9 @@
                 android:id="@+id/num1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/num4"
                 android:layout_alignEnd="@+id/call"
-                android:layout_marginBottom="-220dp"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="103dp"
                 android:text="1" />
 
             <Button
@@ -91,8 +92,8 @@
                 android:id="@+id/num3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignStart="@+id/audio"
                 android:layout_alignTop="@+id/num1"
-                android:layout_toEndOf="@+id/hangup"
                 android:text="3" />
 
             <Button
@@ -100,8 +101,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignEnd="@+id/call"
-                android:layout_alignParentTop="true"
-                android:layout_marginTop="220dp"
+                android:layout_below="@+id/num1"
                 android:text="4" />
 
             <Button
@@ -116,8 +116,8 @@
                 android:id="@+id/num6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/num4"
-                android:layout_toEndOf="@+id/hangup"
+                android:layout_alignStart="@+id/audio"
+                android:layout_below="@+id/num1"
                 android:text="6" />
 
             <Button
@@ -140,7 +140,7 @@
                 android:id="@+id/num9"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignStart="@+id/num12"
+                android:layout_alignStart="@+id/audio"
                 android:layout_below="@+id/num4"
                 android:text="9" />
 
@@ -164,8 +164,8 @@
                 android:id="@+id/num12"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignStart="@+id/audio"
                 android:layout_below="@+id/num7"
-                android:layout_toEndOf="@+id/hangup"
                 android:text="#" />
 
         </RelativeLayout>

@@ -96,6 +96,7 @@
         </RelativeLayout>
 
         <ListView
+            android:id="@+id/playlist"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0.02" />

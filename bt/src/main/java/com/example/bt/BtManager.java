@@ -99,6 +99,9 @@ public class BtManager implements BluetoothProfile.ServiceListener {
         if (mAdapter.isDiscovering()) {
             mAdapter.cancelDiscovery();
         }
+        if(isDeviceBusy()){
+            mDevice.cancelBondProcess();
+        }
         if (!mAdapter.isDiscovering() && !isDeviceBusy()) {
             Log.i(TAG, "startDiscovery");
             return mAdapter.startDiscovery();
@@ -113,8 +116,11 @@ public class BtManager implements BluetoothProfile.ServiceListener {
         mAdapter.closeProfileProxy(BluetoothProfile.AVRCP_CONTROLLER, avrcp);
         mAdapter.closeProfileProxy(BluetoothProfile.PBAP_CLIENT, pbap);
         mAdapter.closeProfileProxy(BluetoothProfile.HEADSET_CLIENT, hfpclient);
-        mPlayer.stop();
-        mPlayer.release();
+        if(mPlayer!=null){
+            mPlayer.stop();
+            mPlayer.release();
+        }
+
         instance = null;
     }
 
@@ -242,6 +248,7 @@ public class BtManager implements BluetoothProfile.ServiceListener {
     }
 
     public void autoConnect() {
+        Log.i(TAG, "autoConnect");
         Set<BluetoothDevice> blueSet = getPairedDevice();
         if (blueSet != null && !blueSet.isEmpty()) {
             BluetoothDevice bd = null;
@@ -302,7 +309,12 @@ public class BtManager implements BluetoothProfile.ServiceListener {
         avrcp.sendPassThroughCmd(mDevice, BluetoothAvrcp.PASSTHROUGH_ID_PAUSE, BluetoothAvrcp.PASSTHROUGH_STATE_PRESS);
         avrcp.sendPassThroughCmd(mDevice, BluetoothAvrcp.PASSTHROUGH_ID_PAUSE, BluetoothAvrcp.PASSTHROUGH_STATE_RELEASE);
     }
-
+    public void stop() {
+        if (avrcp == null)
+            return;
+        avrcp.sendPassThroughCmd(mDevice, BluetoothAvrcp.PASSTHROUGH_ID_STOP, BluetoothAvrcp.PASSTHROUGH_STATE_PRESS);
+        avrcp.sendPassThroughCmd(mDevice, BluetoothAvrcp.PASSTHROUGH_ID_STOP, BluetoothAvrcp.PASSTHROUGH_STATE_RELEASE);
+    }
     public void prev() {
         if (avrcp == null)
             return;
@@ -321,6 +333,9 @@ public class BtManager implements BluetoothProfile.ServiceListener {
         avrcp.getElementAttrCmd();
     }
 
+    public void getPlaylist(){
+        avrcp.getNowPlayingList(mDevice,0,20);
+    }
     //hfpclient
     public void switchAudio() {
         if (hfpclient == null)
