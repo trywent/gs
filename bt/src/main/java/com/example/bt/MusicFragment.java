@@ -169,7 +169,7 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
     public void updateState(PlaybackState state){
         if(play==null||progress==null)
             return;
-        Log.i("BTM","state "+state.getState());
+        //Log.i("BTM","state "+state.getState());
         if(state.getState()==PlaybackState.STATE_PLAYING){
             play.setText("pause");
             playing = true;

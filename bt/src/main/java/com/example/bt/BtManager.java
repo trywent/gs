@@ -184,8 +184,7 @@ public class BtManager implements BluetoothProfile.ServiceListener {
         if (mDevice != null && bd != null && mDevice != bd) {
             if (mDevice.getBondState() == BluetoothDevice.BOND_BONDING)
                 mDevice.cancelBondProcess();
-
-            disconDevice(false);
+            disconDevice(false,null);
         }
         mDevice = bd != null ? bd : mDevice;
         Log.i(TAG, "connectDevice" + mDevice.getName() + " state " + mDevice.getBondState());
@@ -197,19 +196,25 @@ public class BtManager implements BluetoothProfile.ServiceListener {
         connectting = false;
     }
 
-    public void disconDevice(boolean unPair) {
+    public void disconDevice(boolean unPair,BluetoothDevice bd) {
+        BluetoothDevice device;
+        if(bd!=null)
+            device = bd;
+        else
+            device = mDevice;
 
-        if (a2dpsink != null && a2dpsink.getConnectionState(mDevice) != BluetoothA2dpSink.STATE_DISCONNECTED) {
-            a2dpsink.disconnect(mDevice);
+        if (a2dpsink != null && a2dpsink.getConnectionState(device) != BluetoothA2dpSink.STATE_DISCONNECTED) {
+            a2dpsink.disconnect(device);
         }
-        if (hfpclient != null && hfpclient.getConnectionState(mDevice) != BluetoothHeadsetClient.STATE_DISCONNECTED) {
-            hfpclient.disconnect(mDevice);
+        if (hfpclient != null && hfpclient.getConnectionState(device) != BluetoothHeadsetClient.STATE_DISCONNECTED) {
+            hfpclient.disconnect(device);
         }
-        if (pbap != null && pbap.getConnectionState(mDevice) != BluetoothPbapClient.STATE_DISCONNECTED)
-            pbap.disconnect(mDevice);
+        if (pbap != null && pbap.getConnectionState(device) != BluetoothPbapClient.STATE_DISCONNECTED)
+            pbap.disconnect(device);
 
         if (unPair) {
-            mDevice.removeBond();
+            Log.i(TAG, "unpair"+device.getName());
+            device.removeBond();
         }
     }
 
@@ -267,7 +272,7 @@ public class BtManager implements BluetoothProfile.ServiceListener {
         Log.i(TAG, "connectProfile");
         int state;
         if (a2dpsink != null) {
-            state = a2dpsink.getConnectionState(mDevice);
+            state = a2dpsink.getConnectionState(mDevice);Log.i(TAG, "connectProfile a2dp state "+state);
             if (state == BluetoothProfile.STATE_DISCONNECTED || state == BluetoothProfile.STATE_DISCONNECTING) {
                 a2dpsink.connect(mDevice);
                 Log.i(TAG, "connectProfile a2dp");
@@ -275,7 +280,7 @@ public class BtManager implements BluetoothProfile.ServiceListener {
         }
 
         if (hfpclient != null) {
-            state = hfpclient.getConnectionState(mDevice);
+            state = hfpclient.getConnectionState(mDevice);Log.i(TAG, "connectProfile hfpclient state "+state);
             if (state == BluetoothProfile.STATE_DISCONNECTED || state == BluetoothProfile.STATE_DISCONNECTING) {
                 hfpclient.connect(mDevice);
                 Log.i(TAG, "connectProfile hfpclient");
@@ -518,10 +523,8 @@ public class BtManager implements BluetoothProfile.ServiceListener {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {
+            if (BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {//profile 连接广播
                 BluetoothDevice dev = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if (dev != mDevice)
-                    return;
                 int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, -1);
                 mctx.sendMsg(MainActivity.DEVICE_STATE_CHANGE, null);
             } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
@@ -535,13 +538,17 @@ public class BtManager implements BluetoothProfile.ServiceListener {
 
             } else if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                String state = intent.getStringExtra(BluetoothDevice.EXTRA_BOND_STATE);
+                int state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE,-1);
+                if (device!=null&&state==BluetoothDevice.BOND_BONDED&&!isconneted(mDevice))
+                    connectDevice(device);
                 mctx.sendMsg(MainActivity.DEVICE_STATE_CHANGE, null);
             } else if (BluetoothDevice.ACTION_NAME_CHANGED.equals(action)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 String name = intent.getStringExtra(BluetoothDevice.EXTRA_NAME);
                 mctx.sendMsg(MainActivity.DEVICE_STATE_CHANGE, null);
             } else if (BluetoothA2dpSink.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {//a2dpclitent
+                int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, BluetoothProfile.STATE_DISCONNECTED);
+                Log.i(TAG,"a2dp update state "+state);
                 mctx.sendMsg(MainActivity.DEVICE_STATE_CHANGE, null);
             } else if (BluetoothA2dpSink.ACTION_PLAYING_STATE_CHANGED.equals(action)) {
 
@@ -566,10 +573,11 @@ public class BtManager implements BluetoothProfile.ServiceListener {
                 mctx.sendMsg(MainActivity.MUSIC_METADATA, data);
             } else if (BluetoothHeadsetClient.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {//hfpclient
                 int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, BluetoothProfile.STATE_DISCONNECTED);
-                if (state == BluetoothProfile.STATE_CONNECTED) {
+                Log.i(TAG,"hfpclient update state "+state);
+                /*if (state == BluetoothProfile.STATE_CONNECTED) {
                     if (!isconneted(mDevice))
                         autoConnect();
-                }
+                }*/
                 mctx.sendMsg(MainActivity.DEVICE_STATE_CHANGE, null);
             } else if (BluetoothHeadsetClient.ACTION_AUDIO_STATE_CHANGED.equals(action)) {
                 mctx.sendMsg(MainActivity.DEVICE_STATE_CHANGE, null);
@@ -584,7 +592,7 @@ public class BtManager implements BluetoothProfile.ServiceListener {
                     playRing(false);
                 }
             } else if (BluetoothPbapClient.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {//pbap
-
+                mctx.sendMsg(MainActivity.DEVICE_STATE_CHANGE, null);
             } else if ("com.lsec.pbap_downloaded".equals(action)) {
                 mctx.sendMsg(MainActivity.PHONEBOOK_DOWNLOAD, null);
             }

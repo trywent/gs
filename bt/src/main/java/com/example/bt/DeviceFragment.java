@@ -151,9 +151,9 @@ public class DeviceFragment extends AFragment implements AdapterView.OnItemSelec
         }else if(view.getId()==R.id.conn){
             btm.connectDevice(curbd);
         }else if(view.getId()==R.id.disconn){
-            btm.disconDevice(false);
+            btm.disconDevice(false,null);
         }else if(view.getId()==R.id.unpair){
-            btm.disconDevice(true);
+            btm.disconDevice(true,curbd);
         }
 
     }
