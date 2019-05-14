@@ -163,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements AFragment.OnFragm
                     phone.updateInfo();
                     break;
                 case PHONEBOOK_DOWNLOAD:
-                    phone.getPhoneBook();
+                    phone.updatePhoneBook();
                     break;
             }
             //super.handleMessage(msg);

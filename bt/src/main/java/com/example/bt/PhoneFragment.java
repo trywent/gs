@@ -51,6 +51,8 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
     Button call;
     Button hangup;
     Button audio;
+    Button download;
+    Button clear;
     TextView number;
     ListView contacts;
     ListView recentsCall;
@@ -125,6 +127,8 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
         call = view.findViewById(R.id.call);
         hangup = view.findViewById(R.id.hangup);
         audio = view.findViewById(R.id.audio);
+        download = view.findViewById(R.id.download);
+        clear = view.findViewById(R.id.clear);
         number = view.findViewById(R.id.textView3);
         contacts = view.findViewById(R.id.contact);
         recentsCall = view.findViewById(R.id.recent);
@@ -147,6 +151,8 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
         call.setOnClickListener(this);
         hangup.setOnClickListener(this);
         audio.setOnClickListener(this);
+        download.setOnClickListener(this);
+        clear.setOnClickListener(this);
 
         number.setBackgroundColor(Color.WHITE);
         number.setTextSize(30);
@@ -154,12 +160,13 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
 
         mAdapter = new MyAdapter<String[][]>(getContext(),R.layout.mlist);
         contacts.setAdapter(mAdapter);
-        btm.downLoadPhonebook();
+        //btm.downLoadPhonebook();
 
         mhandler = new H();
-        Message msg = mhandler.obtainMessage(MSG_CONTACT);
-        mhandler. sendMessageDelayed(msg,10000);
+        //Message msg = mhandler.obtainMessage(MSG_CONTACT);
+        //mhandler. sendMessageDelayed(msg,10000);
         updateInfo();
+        updatePhoneBook();
         btm.pause();
         return view;
     }
@@ -212,8 +219,15 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
         }else if(view.getId()==R.id.audio){
             btm.switchAudio();
             return;
+        }else if(view.getId()==R.id.download){
+            getPhoneBook();
+            return;
+        }else if(view.getId()==R.id.clear){
+            btm.removePhonebook();
+            mAdapter.clear();
+            return;
         }
-        if(c!=0)
+        if(c!=0&&builder.length()<20)
             builder.append(c);
         int length = builder.length();
         number.setText(builder.subSequence(0,length));
@@ -252,15 +266,24 @@ public class PhoneFragment extends AFragment implements View.OnClickListener,Ada
 
     }
     public void getPhoneBook(){
+        if(mhandler==null)return;
+        btm.downLoadPhonebook();
+        //Message msg = mhandler.obtainMessage(MSG_CONTACT);
+        //mhandler.removeMessages(MSG_CONTACT);
+        //mhandler.sendMessageDelayed(msg,5000);
+    }
+    public void updatePhoneBook(){
+        if(mhandler==null)return;
         Message msg = mhandler.obtainMessage(MSG_CONTACT);
         mhandler.removeMessages(MSG_CONTACT);
-        mhandler. sendMessage(msg);
+        mhandler.sendMessage(msg);
     }
-
     @Override
     public boolean onLongClick(View view) {
         if(view.getId()==R.id.delete){
-
+            if(builder.length()>0)
+                builder.delete(0,builder.length()-1);
+            number.setText("");
         }
         return true;
     }

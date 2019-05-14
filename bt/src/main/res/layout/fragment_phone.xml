@@ -6,173 +6,213 @@
 
     <!-- TODO: Update blank fragment layout -->
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="1125dp"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:layout_editor_absoluteX="8dp"
         tools:layout_editor_absoluteY="8dp">
 
         <ListView
             android:id="@+id/contact"
-            android:layout_width="311dp"
-            android:layout_height="538dp" />
+            android:layout_width="300dp"
+            android:layout_height="match_parent" />
 
 
-        <RelativeLayout
-            android:layout_width="393dp"
-            android:layout_height="517dp">
+        <LinearLayout
+            android:layout_width="400dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <Button
-                android:id="@+id/call"
-                android:layout_width="100dp"
-                android:layout_height="40dp"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentStart="true"
-                android:layout_marginBottom="155dp"
-                android:layout_marginStart="33dp"
-                android:text="call" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/hangup"
-                android:layout_width="100dp"
-                android:layout_height="40dp"
-                android:layout_alignTop="@+id/call"
-                android:layout_centerHorizontal="true"
-                android:text="hang up" />
+                <TextView
+                    android:id="@+id/textView3"
+                    android:layout_width="200dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginEnd="106dp"
+                    android:layout_marginRight="106dp"
+                    android:layout_marginTop="28dp"
+                    android:layout_weight="1" />
 
-            <TextView
-                android:id="@+id/textView3"
-                android:layout_width="287dp"
-                android:layout_height="40dp"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginEnd="106dp"
-                android:layout_marginRight="106dp"
-                android:layout_marginTop="28dp" />
+                <Button
+                    android:id="@+id/delete"
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginStart="-106dp"
+                    android:layout_marginTop="22dp"
+                    android:layout_toEndOf="@+id/textView3"
+                    android:layout_weight="1"
+                    android:text="DEL" />
 
-            <Button
-                android:id="@+id/audio"
-                android:layout_width="100dp"
-                android:layout_height="40dp"
-                android:layout_alignParentEnd="true"
-                android:layout_alignTop="@+id/call"
-                android:layout_marginEnd="29dp"
-                android:text="audio" />
+            </LinearLayout>
 
-            <Button
-                android:id="@+id/delete"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_marginStart="-106dp"
-                android:layout_marginTop="22dp"
-                android:layout_toEndOf="@+id/textView3"
-                android:text="DEL" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="217dp">
 
-            <Button
-                android:id="@+id/num1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignEnd="@+id/call"
-                android:layout_alignParentTop="true"
-                android:layout_marginTop="103dp"
-                android:text="1" />
+                <Button
+                    android:id="@+id/num1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginStart="39dp"
+                    android:layout_marginTop="12dp"
+                    android:text="1" />
 
-            <Button
-                android:id="@+id/num2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/num1"
-                android:layout_centerHorizontal="true"
-                android:text="2" />
+                <Button
+                    android:id="@+id/num2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/num1"
+                    android:layout_centerHorizontal="true"
+                    android:text="2" />
 
-            <Button
-                android:id="@+id/num3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignStart="@+id/audio"
-                android:layout_alignTop="@+id/num1"
-                android:text="3" />
+                <Button
+                    android:id="@+id/num3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignTop="@+id/num1"
+                    android:layout_marginEnd="37dp"
+                    android:text="3" />
 
-            <Button
-                android:id="@+id/num4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignEnd="@+id/call"
-                android:layout_below="@+id/num1"
-                android:text="4" />
+                <Button
+                    android:id="@+id/num4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignStart="@+id/num1"
+                    android:layout_below="@+id/num1"
+                    android:text="4" />
 
-            <Button
-                android:id="@+id/num5"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/num4"
-                android:layout_centerHorizontal="true"
-                android:text="5" />
+                <Button
+                    android:id="@+id/num5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/num4"
+                    android:layout_centerHorizontal="true"
+                    android:text="5" />
 
-            <Button
-                android:id="@+id/num6"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignStart="@+id/audio"
-                android:layout_below="@+id/num1"
-                android:text="6" />
+                <Button
+                    android:id="@+id/num6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignStart="@+id/num3"
+                    android:layout_below="@+id/num1"
+                    android:text="6" />
 
-            <Button
-                android:id="@+id/num7"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignEnd="@+id/call"
-                android:layout_below="@+id/num4"
-                android:text="7" />
+                <Button
+                    android:id="@+id/num7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignStart="@+id/num1"
+                    android:layout_below="@+id/num4"
+                    android:text="7" />
 
-            <Button
-                android:id="@+id/num8"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/num7"
-                android:layout_centerHorizontal="true"
-                android:text="8" />
+                <Button
+                    android:id="@+id/num8"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/num7"
+                    android:layout_centerHorizontal="true"
+                    android:text="8" />
 
-            <Button
-                android:id="@+id/num9"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignStart="@+id/audio"
-                android:layout_below="@+id/num4"
-                android:text="9" />
+                <Button
+                    android:id="@+id/num9"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignStart="@+id/num3"
+                    android:layout_below="@+id/num4"
+                    android:text="9" />
 
-            <Button
-                android:id="@+id/num10"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignEnd="@+id/call"
-                android:layout_below="@+id/num7"
-                android:text="*" />
+                <Button
+                    android:id="@+id/num10"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignStart="@+id/num1"
+                    android:layout_below="@+id/num7"
+                    android:text="*" />
 
-            <Button
-                android:id="@+id/num11"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/num10"
-                android:layout_centerHorizontal="true"
-                android:text="0" />
+                <Button
+                    android:id="@+id/num11"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/num10"
+                    android:layout_centerHorizontal="true"
+                    android:text="0" />
 
-            <Button
-                android:id="@+id/num12"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignStart="@+id/audio"
-                android:layout_below="@+id/num7"
-                android:text="#" />
+                <Button
+                    android:id="@+id/num12"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignStart="@+id/num3"
+                    android:layout_below="@+id/num7"
+                    android:text="#" />
 
-        </RelativeLayout>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="128dp">
+
+                <Button
+                    android:id="@+id/call"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginStart="33dp"
+                    android:layout_marginTop="5dp"
+                    android:text="call" />
+
+                <Button
+                    android:id="@+id/hangup"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:layout_alignBottom="@+id/call"
+                    android:layout_centerHorizontal="true"
+                    android:text="hang up" />
+
+                <Button
+                    android:id="@+id/audio"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:layout_alignBottom="@+id/call"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="33dp"
+                    android:text="audio" />
+
+                <Button
+                    android:id="@+id/download"
+                    android:layout_width="137dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignStart="@+id/call"
+                    android:layout_marginBottom="19dp"
+                    android:text="download" />
+
+                <Button
+                    android:id="@+id/clear"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:layout_alignStart="@+id/audio"
+                    android:layout_alignTop="@+id/download"
+                    android:text="clear" />
+
+            </RelativeLayout>
+        </LinearLayout>
 
         <ListView
             android:id="@+id/recent"
             android:layout_width="311dp"
-            android:layout_height="538dp" />
+            android:layout_height="match_parent" />
     </LinearLayout>
 </FrameLayout>
