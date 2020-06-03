@@ -1,1 +1,1 @@
-include ':app', ':bt'
+include ':app', ':bt', ':newbt'

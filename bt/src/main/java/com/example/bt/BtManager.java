@@ -348,6 +348,7 @@ public class BtManager implements BluetoothProfile.ServiceListener {
     public void getPlaylist(){
         avrcp.getNowPlayingList(mDevice,0,20);
     }
+
     //hfpclient
     public void switchAudio() {
         if (hfpclient == null)
@@ -474,7 +475,8 @@ public class BtManager implements BluetoothProfile.ServiceListener {
         pbap.disconnect(mDevice);
     }
     public void downLoadPhonebook() {
-        if (pbap == null||(SystemClock.uptimeMillis()-pbapDownloading)<60000*5)
+        int state = pbap.getConnectionState(mDevice);
+        if (pbap == null||(state!=BluetoothProfile.STATE_DISCONNECTED && (SystemClock.uptimeMillis()-pbapDownloading)<60000*5))
             return;
         Log.i(TAG,"download phonebook");
         pbapDownloading = SystemClock.uptimeMillis();
@@ -596,7 +598,8 @@ public class BtManager implements BluetoothProfile.ServiceListener {
             //hfpclient
             if (BluetoothHeadsetClient.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {
                 int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, BluetoothProfile.STATE_DISCONNECTED);
-                Log.i(TAG,"hfpclient update state "+state);
+                int reason = intent.getIntExtra("disconnect_reason",0);
+                Log.i(TAG,"hfpclient update state "+state+" reason "+reason);
                 /*if (state == BluetoothProfile.STATE_CONNECTED) {
                     if (!isconneted(mDevice))
                         autoConnect();
