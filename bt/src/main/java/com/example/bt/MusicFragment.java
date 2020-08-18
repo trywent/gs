@@ -8,6 +8,9 @@ import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,6 +21,9 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 /**
@@ -40,6 +46,8 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
 
     private OnFragmentInteractionListener mListener;
 
+    Handler mHandler;
+    Timer mTimer;
     View root;
     Button pre,play,next,butt;
     TextView title;
@@ -53,6 +61,7 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
     int trackNum=0;
     int trackTotal=0;
     long duration = 0;
+    long curPos = 0,timerVal = 0;
 
     boolean playing=false;
 
@@ -105,6 +114,8 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
             btm.play();
             return root;
         }
+        mHandler = new MHander();
+        mTimer = new Timer("music");
         root =  inflater.inflate(R.layout.fragment_music, container, false);
         pre = root.findViewById(R.id.pre);
         play = root.findViewById(R.id.play);
@@ -153,7 +164,8 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
                 info.setText("\t歌曲名:"+trackTitle+"\n"+"\t歌手:"+artist+"\n"+"\t专辑名:"+album +"\n\t歌曲长度:"+min+"m"+sec+"s");
             if(title!=null)
                 title.setText(" ");
-        }else if((curDuration>0&&duration != curDuration)){//有些播放器时间第二次才正确.
+        }else if((curDuration>0 && duration != curDuration)){//有些播放器时间第二次才正确.
+            curPos = 0;
             duration = curDuration;
             int s = (int)(duration/1000.0);
             int min = (int)(s/60.0);
@@ -165,6 +177,17 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
             if(title!=null)
             title.setText(trackTitle);
         }
+        if(mTimer!=null && duration!=0){
+            mTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    if(timerVal!=curPos) return;
+                    curPos +=1000;
+                    timerVal = curPos;
+                    progress.setProgress((int)((100*curPos)/duration));
+                }
+            },1000,1000);
+        }
     }
     public void updateState(PlaybackState state){
         if(play==null||progress==null)
@@ -173,14 +196,15 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
         if(state.getState()==PlaybackState.STATE_PLAYING){
             play.setText("pause");
             playing = true;
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(UPDATE),1000);
         }
         else{
             play.setText("play");
             playing = false;
         }
-        long pos = state.getPosition();
-        if(duration>0&&pos>0){
-            long val = (100*pos)/duration;
+        curPos = state.getPosition();
+        if(duration>0 && curPos>0){
+            long val = (100*curPos)/duration;
             //Log.i("BTM","duration "+state.getPosition()+"val "+val);
             progress.setProgress((int)val);
         }
@@ -235,5 +259,17 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
     public void stopPlay(){
         if(playing)
             btm.pause();
+    }
+    //
+    static final int UPDATE = 1;
+    class MHander extends Handler{
+        public void handleMessage(Message msg) {
+            if(msg.what == UPDATE){
+                PlaybackState state = btm.getPlaybackState();
+                if(state!=null){
+                    updateState(state);
+                }
+            }
+        }
     }
 }

@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Set;
 
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.bluetooth.BluetoothA2dpSink;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothAvrcp;
@@ -16,11 +18,16 @@ import android.bluetooth.BluetoothHeadsetClient;
 import android.bluetooth.BluetoothHeadsetClientCall;
 import android.bluetooth.BluetoothPbapClient;
 import android.bluetooth.BluetoothProfile;
+import android.content.ComponentName;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.MediaPlayer;
+import android.media.browse.MediaBrowser;
+import android.media.session.MediaController;
+import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.content.BroadcastReceiver;
@@ -67,6 +74,11 @@ public class BtManager implements BluetoothProfile.ServiceListener {
         mAdapter.getProfileProxy(context, this, BluetoothProfile.PBAP_CLIENT);
         mAdapter.getProfileProxy(context, this, BluetoothProfile.HEADSET_CLIENT);
         mAdapter.setScanMode(BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE, 120);
+        //avrcp
+        mConnectionCallback = new BtMediaCallback();
+        mMediaBrowser = new MediaBrowser(getContext(),new ComponentName(BT_BROWSED_PACKAGE, BT_BROWSED_SERVICE),
+                mConnectionCallback, null);
+        mMediaBrowser.connect();
     }
 
     public static BtManager getInstance(MainActivity context) {
@@ -308,7 +320,95 @@ public class BtManager implements BluetoothProfile.ServiceListener {
     }
 
     //avrcp
+    Context getContext(){
+        return mctx;
+    }
+    private MediaBrowser mMediaBrowser = null;
+    private MediaController mMediaController = null;
+    private static final String BT_BROWSED_PACKAGE = "com.android.bluetooth";
+    private static final String BT_BROWSED_SERVICE = "com.android.bluetooth.avrcpcontroller.BluetoothMediaBrowserService";
+
+    private MediaBrowser.ConnectionCallback mConnectionCallback = null;
+    class BtMediaCallback extends  MediaBrowser.ConnectionCallback{
+        @Override
+        public void onConnected() {
+            MediaSession.Token token = mMediaBrowser.getSessionToken();
+            Log.d(TAG, "onConnected: session token " + token);
+            if (token == null) {
+                throw new IllegalArgumentException("No Session token");
+            }
+            //get mediaContoller
+            mMediaController = new MediaController(getContext(), token);
+            mMediaController.registerCallback(new MediaController.Callback() {
+                @Override
+                public void onSessionDestroyed() {
+                    Log.d(TAG, "onSessionDestroyed");
+                }
+
+                @Override
+                public void onSessionEvent(@NonNull String event, @Nullable Bundle extras) {
+                    Log.d(TAG, "onSessionEvent event: " + event);
+                }
+
+                @Override
+                public void onPlaybackStateChanged(@Nullable PlaybackState state) {
+                    Log.d(TAG, "onPlaybackStateChanged state: " + state);
+                    if(state !=null)
+                        mctx.sendMsg(MainActivity.MUSIC_STATE_CHANGE, state);
+                }
+
+                @Override
+                public void onMetadataChanged(@Nullable MediaMetadata metadata) {
+                    Log.d(TAG, "onMetadataChanged metadata: " + metadata);
+                    if (metadata != null) {
+                            mctx.sendMsg(MainActivity.MUSIC_METADATA, metadata);
+                    }
+                }
+
+                @Override
+                public void onQueueChanged(@Nullable List<MediaSession.QueueItem> queue) {
+                    Log.d(TAG, "onQueueChanged");
+                }
+
+                @Override
+                public void onQueueTitleChanged(@Nullable CharSequence title) {
+                    Log.d(TAG, "onQueueTitleChanged title: " + title);
+                }
+
+                @Override
+                public void onExtrasChanged(@Nullable Bundle extras) {
+                    Log.d(TAG, "onExtrasChanged extras: " + extras);
+                }
+
+                @Override
+                public void onAudioInfoChanged(MediaController.PlaybackInfo info) {
+                    Log.d(TAG, "onAudioInfoChanged info: " + info);
+                }
+            });
+        }
+
+        @Override
+        public void onConnectionFailed() {
+            Log.d(TAG, "onConnectionFailed");
+            mMediaController = null;
+        }
+
+        @Override
+        public void onConnectionSuspended() {
+            Log.d(TAG, "onConnectionSuspended");
+        }
+    };
+    PlaybackState getPlaybackState(){
+        if(mMediaController != null){
+            return mMediaController.getPlaybackState();
+        }
+        return null;
+    }
     public void play() {
+        if(mMediaController != null){
+            mMediaController.getTransportControls().play();
+            return;
+        }
         if (avrcp == null)
             return;
         avrcp.sendPassThroughCmd(mDevice, BluetoothAvrcp.PASSTHROUGH_ID_PLAY, BluetoothAvrcp.PASSTHROUGH_STATE_PRESS);
@@ -316,18 +416,30 @@ public class BtManager implements BluetoothProfile.ServiceListener {
     }
 
     public void pause() {
+        if(mMediaController != null){
+            mMediaController.getTransportControls().pause();
+            return;
+        }
         if (avrcp == null)
             return;
         avrcp.sendPassThroughCmd(mDevice, BluetoothAvrcp.PASSTHROUGH_ID_PAUSE, BluetoothAvrcp.PASSTHROUGH_STATE_PRESS);
         avrcp.sendPassThroughCmd(mDevice, BluetoothAvrcp.PASSTHROUGH_ID_PAUSE, BluetoothAvrcp.PASSTHROUGH_STATE_RELEASE);
     }
     public void stop() {
+        if(mMediaController != null){
+            mMediaController.getTransportControls().stop();
+            return;
+        }
         if (avrcp == null)
             return;
         avrcp.sendPassThroughCmd(mDevice, BluetoothAvrcp.PASSTHROUGH_ID_STOP, BluetoothAvrcp.PASSTHROUGH_STATE_PRESS);
         avrcp.sendPassThroughCmd(mDevice, BluetoothAvrcp.PASSTHROUGH_ID_STOP, BluetoothAvrcp.PASSTHROUGH_STATE_RELEASE);
     }
     public void prev() {
+        if(mMediaController != null){
+            mMediaController.getTransportControls().skipToPrevious();
+            return;
+        }
         if (avrcp == null)
             return;
         avrcp.sendPassThroughCmd(mDevice, BluetoothAvrcp.PASSTHROUGH_ID_BACKWARD, BluetoothAvrcp.PASSTHROUGH_STATE_PRESS);
@@ -335,6 +447,10 @@ public class BtManager implements BluetoothProfile.ServiceListener {
     }
 
     public void next() {
+        if(mMediaController != null){
+            mMediaController.getTransportControls().skipToNext();
+            return;
+        }
         if (avrcp == null)
             return;
         avrcp.sendPassThroughCmd(mDevice, BluetoothAvrcp.PASSTHROUGH_ID_FORWARD, BluetoothAvrcp.PASSTHROUGH_STATE_PRESS);
@@ -346,6 +462,9 @@ public class BtManager implements BluetoothProfile.ServiceListener {
     }
 
     public void getPlaylist(){
+        if(mMediaController != null){
+            return;
+        }
         avrcp.getNowPlayingList(mDevice,0,20);
     }
 
