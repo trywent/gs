@@ -47,7 +47,6 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
     private OnFragmentInteractionListener mListener;
 
     Handler mHandler;
-    Timer mTimer;
     View root;
     Button pre,play,next,butt;
     TextView title;
@@ -115,7 +114,6 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
             return root;
         }
         mHandler = new MHander();
-        mTimer = new Timer("music");
         root =  inflater.inflate(R.layout.fragment_music, container, false);
         pre = root.findViewById(R.id.pre);
         play = root.findViewById(R.id.play);
@@ -177,17 +175,6 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
             if(title!=null)
             title.setText(trackTitle);
         }
-        if(mTimer!=null && duration!=0){
-            mTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    if(timerVal!=curPos) return;
-                    curPos +=1000;
-                    timerVal = curPos;
-                    progress.setProgress((int)((100*curPos)/duration));
-                }
-            },1000,1000);
-        }
     }
     public void updateState(PlaybackState state){
         if(play==null||progress==null)
@@ -221,6 +208,7 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
             }else{
                 playing = true;
                 btm.play();
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(UPDATE),1000);
                 //play.setText("pause");
             }
 
@@ -265,10 +253,13 @@ public class MusicFragment extends AFragment implements View.OnClickListener {
     class MHander extends Handler{
         public void handleMessage(Message msg) {
             if(msg.what == UPDATE){
-                PlaybackState state = btm.getPlaybackState();
-                if(state!=null){
-                    updateState(state);
-                }
+                Log.i("BTM","update "+timerVal +" curPos:"+curPos+ " playing:"+playing);
+                if(timerVal >curPos || !playing) return;
+                curPos +=1000;
+                timerVal = curPos;
+                progress.setProgress((int)((100*curPos)/duration));
+                this.removeMessages(UPDATE);
+                this.sendMessageDelayed(mHandler.obtainMessage(UPDATE),1000);
             }
         }
     }

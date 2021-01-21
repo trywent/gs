@@ -166,6 +166,8 @@ public class DeviceFragment extends AFragment implements AdapterView.OnItemSelec
             if(d.getAddress().equals(addr))
                 return;
         }
+        if(device.getName()==null)
+            return;
         cachedDevcie.add(device);
         mAdapter.add(device);
     }
